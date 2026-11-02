@@ -1,0 +1,42 @@
+---
+import { Image } from "astro:assets";
+import { formatMinutes, totalMinutes, type Recipe } from "../lib/recipes";
+
+interface Props {
+  recipe: Recipe;
+}
+
+const { recipe } = Astro.props;
+const { title, description, cover, coverAlt, servings, draft } = recipe.data;
+const total = totalMinutes(recipe);
+const meta = [
+  total !== undefined ? formatMinutes(total) : null,
+  servings !== undefined ? `Serves ${servings}` : null,
+].filter(Boolean);
+---
+
+<article class="card">
+  <a class="card-link" href={`/recipes/${recipe.id}/`}>
+    <div class="card-media">
+      {
+        cover ? (
+          <Image
+            src={cover}
+            alt={coverAlt ?? title}
+            widths={[400, 640, 900]}
+            sizes="(min-width: 960px) 340px, (min-width: 600px) 45vw, 92vw"
+            loading="lazy"
+          />
+        ) : (
+          <div class="card-placeholder" aria-hidden="true">No photo yet</div>
+        )
+      }
+      {draft && <span class="badge">Draft</span>}
+    </div>
+    <div class="card-body">
+      <h2 class="card-title">{title}</h2>
+      <p class="card-desc">{description}</p>
+      {meta.length > 0 && <p class="card-meta">{meta.join(" · ")}</p>}
+    </div>
+  </a>
+</article>

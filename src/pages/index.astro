@@ -1,0 +1,31 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import RecipeCard from "../components/RecipeCard.astro";
+import TagList from "../components/TagList.astro";
+import { SITE } from "../config";
+import { getRecipes } from "../lib/recipes";
+
+const recipes = await getRecipes();
+---
+
+<BaseLayout>
+  <section class="wrap hero">
+    <p class="eyebrow">Recipe log</p>
+    <h1 class="hero-title">{SITE.tagline}</h1>
+  </section>
+
+  <section class="wrap">
+    <TagList recipes={recipes} />
+    {
+      recipes.length > 0 ? (
+        <div class="grid">
+          {recipes.map((recipe) => (
+            <RecipeCard recipe={recipe} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">No recipes yet. Check back soon.</p>
+      )
+    }
+  </section>
+</BaseLayout>

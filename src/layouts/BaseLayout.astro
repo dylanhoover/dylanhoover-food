@@ -1,0 +1,76 @@
+---
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/inter";
+import "../styles/global.css";
+import { SITE } from "../config";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: "website" | "article";
+}
+
+const {
+  title,
+  description = SITE.description,
+  image,
+  type = "website",
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE.title}
+      href="/rss.xml"
+    />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#faf6f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1512" media="(prefers-color-scheme: dark)" />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap header-row">
+        <a class="brand" href="/">{SITE.title}</a>
+        <nav class="nav" aria-label="Primary">
+          <a href="/">Recipes</a>
+          <a href={SITE.portfolioUrl}>Portfolio&nbsp;↗</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap footer-row">
+        <span>© {year} Dylan Hoover</span>
+        <span class="footer-links">
+          <a href="/rss.xml">RSS</a>
+          <a href={SITE.portfolioUrl}>dylanhoover.dev</a>
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>

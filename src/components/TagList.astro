@@ -1,0 +1,31 @@
+---
+import { getTags, type Recipe } from "../lib/recipes";
+
+interface Props {
+  recipes: Recipe[];
+  active?: string;
+}
+
+const { recipes, active } = Astro.props;
+const tags = getTags(recipes);
+---
+
+{
+  tags.length > 0 && (
+    <nav class="chips" aria-label="Filter by tag">
+      <a class="chip" href="/" aria-current={active ? undefined : "page"}>
+        All
+      </a>
+      {tags.map((tag) => (
+        <a
+          class="chip"
+          href={`/tags/${tag.slug}/`}
+          aria-current={active === tag.slug ? "page" : undefined}
+        >
+          {tag.name}
+          <span class="chip-count">{tag.count}</span>
+        </a>
+      ))}
+    </nav>
+  )
+}

@@ -1,0 +1,113 @@
+---
+import { Image, getImage } from "astro:assets";
+import { render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  formatDate,
+  formatMinutes,
+  getRecipes,
+  tagSlug,
+  totalMinutes,
+} from "../../lib/recipes";
+
+export async function getStaticPaths() {
+  const recipes = await getRecipes();
+  return recipes.map((recipe) => ({
+    params: { slug: recipe.id },
+    props: { recipe },
+  }));
+}
+
+const { recipe } = Astro.props;
+const { Content } = await render(recipe);
+const { title, description, date, cover, coverAlt, prepTime, cookTime, servings, tags } =
+  recipe.data;
+
+const total = totalMinutes(recipe);
+const facts = [
+  prepTime !== undefined && { label: "Prep", value: formatMinutes(prepTime) },
+  cookTime !== undefined && { label: "Cook", value: formatMinutes(cookTime) },
+  total !== undefined &&
+    prepTime !== undefined &&
+    cookTime !== undefined && { label: "Total", value: formatMinutes(total) },
+  servings !== undefined && { label: "Serves", value: String(servings) },
+].filter((fact): fact is { label: string; value: string } => Boolean(fact));
+
+let ogImage: string | undefined;
+if (cover) {
+  const optimized = await getImage({ src: cover, width: 1200, height: 630, fit: "cover" });
+  ogImage = new URL(optimized.src, Astro.site).toString();
+}
+---
+
+<BaseLayout title={title} description={description} image={ogImage} type="article">
+  <article class="recipe">
+    <header class="wrap-narrow recipe-header">
+      <p class="eyebrow">
+        <a href="/">Recipes</a>
+        <span aria-hidden="true"> / </span>
+        <time datetime={date.toISOString()}>Cooked {formatDate(date)}</time>
+      </p>
+      <h1 class="recipe-title">{title}</h1>
+      <p class="recipe-desc">{description}</p>
+      {
+        tags.length > 0 && (
+          <ul class="tag-row">
+            {tags.map((tag) => (
+              <li>
+                <a class="chip" href={`/tags/${tagSlug(tag)}/`}>
+                  {tag}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    {
+      cover && (
+        <figure class="wrap recipe-cover">
+          <Image
+            src={cover}
+            alt={coverAlt ?? title}
+            widths={[800, 1200, 1600]}
+            sizes="(min-width: 1120px) 1072px, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </figure>
+      )
+    }
+
+    <div class="wrap-narrow">
+      {
+        facts.length > 0 && (
+          <dl class="facts">
+            {facts.map((fact) => (
+              <div class="fact">
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <p class="recipe-actions">
+        <button type="button" class="btn" data-print>Print recipe</button>
+        <a class="btn btn-ghost" href="/">← All recipes</a>
+      </p>
+    </div>
+  </article>
+
+  <script>
+    document
+      .querySelector("[data-print]")
+      ?.addEventListener("click", () => window.print());
+  </script>
+</BaseLayout>

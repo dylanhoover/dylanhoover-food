@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import RecipeCard from "../../components/RecipeCard.astro";
+import TagList from "../../components/TagList.astro";
+import { getRecipes, getTags, tagSlug } from "../../lib/recipes";
+
+export async function getStaticPaths() {
+  const recipes = await getRecipes();
+  return getTags(recipes).map((tag) => ({
+    params: { tag: tag.slug },
+    props: {
+      name: tag.name,
+      recipes: recipes.filter((r) => r.data.tags.some((t) => tagSlug(t) === tag.slug)),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { name, recipes } = Astro.props;
+const allRecipes = await getRecipes();
+---
+
+<BaseLayout title={name} description={`Recipes tagged ${name}.`}>
+  <section class="wrap hero">
+    <p class="eyebrow">Tagged</p>
+    <h1 class="hero-title">{name}</h1>
+  </section>
+
+  <section class="wrap">
+    <TagList recipes={allRecipes} active={tag} />
+    <div class="grid">
+      {recipes.map((recipe) => <RecipeCard recipe={recipe} />)}
+    </div>
+  </section>
+</BaseLayout>
