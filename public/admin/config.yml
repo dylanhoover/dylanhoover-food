@@ -1,0 +1,44 @@
+backend:
+  name: github
+  repo: dylanhoover/dylanhoover-food
+  branch: main
+
+site_url: https://food.dylanhoover.dev
+display_url: https://food.dylanhoover.dev
+
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: recipes
+    label: Recipes
+    label_singular: Recipe
+    folder: src/content/recipes
+    path: "{{slug}}/index"
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{slug}}"
+    media_folder: ""
+    public_folder: ""
+    summary: "{{title}}"
+    sortable_fields: [date, title]
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Short description
+        name: description
+        widget: text
+        hint: One or two sentences shown on the recipe card and in link previews.
+      - { label: Date cooked, name: date, widget: datetime, type: date }
+      - { label: Cover photo, name: cover, widget: image, required: false }
+      - { label: Cover photo description, name: coverAlt, widget: string, required: false, hint: "Describe the photo for screen readers." }
+      - { label: Prep time (minutes), name: prepTime, widget: number, value_type: int, min: 0, required: false }
+      - { label: Cook time (minutes), name: cookTime, widget: number, value_type: int, min: 0, required: false }
+      - { label: Servings, name: servings, widget: string, required: false }
+      - { label: Tags, name: tags, widget: list, required: false, default: [] }
+      - { label: Draft, name: draft, widget: boolean, default: false, hint: "Turn on to keep this recipe off the live site." }
+      - label: Recipe
+        name: body
+        widget: markdown
+        hint: Add photos with the image button. Photos are resized automatically.
+        default: "## Ingredients\n\n- \n\n## Steps\n\n1. \n\n## Notes\n\n"
